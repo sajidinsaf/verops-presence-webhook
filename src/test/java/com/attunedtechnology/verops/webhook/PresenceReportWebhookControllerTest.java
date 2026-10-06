@@ -35,7 +35,7 @@ class PresenceReportWebhookControllerTest {
     void rejectsMultipartWithEmptyFile() throws Exception {
         MockMultipartFile empty = new MockMultipartFile("file", "empty.csv",
                 "text/csv", new byte[0]);
-        mvc.perform(multipart("/demo/weekly-presence-report").file(empty))
+        mvc.perform(multipart("/verops/demo/weekly-presence-report").file(empty))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
     }
@@ -45,7 +45,7 @@ class PresenceReportWebhookControllerTest {
         byte[] csv = "host,presence\nLAPTOP-01,office\n".getBytes();
         MockMultipartFile file = new MockMultipartFile("file", "presence.csv",
                 "text/csv", csv);
-        mvc.perform(multipart("/demo/weekly-presence-report").file(file))
+        mvc.perform(multipart("/verops/demo/weekly-presence-report").file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("saved"))
                 .andExpect(jsonPath("$.filename").value("presence.csv"))
@@ -55,7 +55,7 @@ class PresenceReportWebhookControllerTest {
     @Test
     void acceptsRawCsvBodyAndReturns200() throws Exception {
         byte[] csv = "host,presence\nDESKTOP-02,remote\n".getBytes();
-        mvc.perform(post("/demo/weekly-presence-report")
+        mvc.perform(post("/verops/demo/weekly-presence-report")
                         .contentType(MediaType.TEXT_PLAIN)
                         .content(csv))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class PresenceReportWebhookControllerTest {
 
     @Test
     void rejectsEmptyRawBody() throws Exception {
-        mvc.perform(post("/demo/weekly-presence-report")
+        mvc.perform(post("/verops/demo/weekly-presence-report")
                         .contentType(MediaType.TEXT_PLAIN)
                         .content(new byte[0]))
                 .andExpect(status().isBadRequest());
@@ -81,9 +81,9 @@ class PresenceReportWebhookControllerTest {
         MockMultipartFile f2 = new MockMultipartFile("file", "overwrite-test.csv",
                 "text/csv", second);
 
-        mvc.perform(multipart("/demo/weekly-presence-report").file(f1))
+        mvc.perform(multipart("/verops/demo/weekly-presence-report").file(f1))
                 .andExpect(status().isOk());
-        mvc.perform(multipart("/demo/weekly-presence-report").file(f2))
+        mvc.perform(multipart("/verops/demo/weekly-presence-report").file(f2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bytes").value(second.length));
     }

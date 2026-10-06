@@ -20,9 +20,9 @@ import java.util.Map;
  * Webhook endpoint that receives the VerOps weekly presence report and
  * persists it to the configured storage directory.
  *
- * <p>The endpoint is mounted at {@code /demo/weekly-presence-report}.
- * When the WAR is deployed as {@code verops.war} on the shared MochaHost
- * Tomcat, the full public URL is:
+ * <p>The endpoint is mounted at {@code /verops/demo/weekly-presence-report}.
+ * The WAR is named {@code ROOT.war} so Tomcat serves it at the root context
+ * path ({@code /}) — no renaming needed on MochaHost.  The full public URL is:
  * <pre>https://o11y.attunedtechnology.com/verops/demo/weekly-presence-report</pre>
  *
  * <p><b>Accepted request formats</b>
@@ -41,7 +41,7 @@ import java.util.Map;
  * silently overwritten.
  */
 @RestController
-@RequestMapping("/demo/weekly-presence-report")
+@RequestMapping("/verops/demo/weekly-presence-report")
 public class PresenceReportWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(PresenceReportWebhookController.class);

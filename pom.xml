@@ -16,9 +16,10 @@
     <artifactId>verops-presence-webhook</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <!--
-        WAR must be deployed as verops.war so the context path becomes /verops.
-        The final name is set explicitly rather than relying on artifactId to
-        avoid any packaging surprises when Maven appends the version suffix.
+        WAR is named ROOT.war so Tomcat serves it at the root context path (/)
+        with no renaming required on MochaHost.  The /verops prefix is part of
+        the controller mapping, keeping the public URL unchanged:
+        https://o11y.attunedtechnology.com/verops/demo/weekly-presence-report
     -->
     <packaging>war</packaging>
     <name>verops-presence-webhook</name>
@@ -26,8 +27,8 @@
 
     <properties>
         <java.version>17</java.version>
-        <!-- WAR deployed as verops.war → context path /verops on shared Tomcat -->
-        <war.finalName>verops</war.finalName>
+        <!-- ROOT.war → context path / on shared Tomcat; no rename needed on MochaHost -->
+        <war.finalName>ROOT</war.finalName>
     </properties>
 
     <dependencies>
