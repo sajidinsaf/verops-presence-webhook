@@ -99,7 +99,21 @@ class PresenceReportWebhookControllerTest {
                         .content(csv))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("saved"))
+                // Default filename is generic so a timestamp suffix is appended.
+                .andExpect(jsonPath("$.filename").value(
+                        org.hamcrest.Matchers.matchesPattern("weekly-presence-report_\\d{2}-\\d{2}-\\d{4}_\\d{2}-\\d{2}\\.csv")))
                 .andExpect(jsonPath("$.bytes").value(csv.length));
+    }
+
+    @Test
+    void rawBodyWithExplicitTimestampedNameIsNotModified() throws Exception {
+        byte[] csv = "host,presence\nDESKTOP-03,office\n".getBytes();
+        mvc.perform(post(URL + "?filename=hosts-inventory-20261005-0600.csv")
+                        .header(PresenceReportWebhookController.AUTH_HEADER, TOKEN)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(csv))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.filename").value("hosts-inventory-20261005-0600.csv"));
     }
 
     @Test
