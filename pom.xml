@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.6</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.attunedtechnology</groupId>
+    <artifactId>verops-presence-webhook</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <!--
+        WAR must be deployed as verops.war so the context path becomes /verops.
+        The final name is set explicitly rather than relying on artifactId to
+        avoid any packaging surprises when Maven appends the version suffix.
+    -->
+    <packaging>war</packaging>
+    <name>verops-presence-webhook</name>
+    <description>Webhook receiver for VerOps weekly presence report — stores the report to the MochaHost filesystem</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <!-- WAR deployed as verops.war → context path /verops on shared Tomcat -->
+        <war.finalName>verops</war.finalName>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot web — embedded Tomcat excluded for WAR deployment -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Servlet API provided by the external Tomcat -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${war.finalName}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

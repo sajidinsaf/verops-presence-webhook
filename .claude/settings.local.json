@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(ls *)",
+      "Bash(java *)",
+      "Bash(ssh *)",
+      "Read(//c//**)",
+      "Edit(.claude/settings.local.json)"
+    ]
+  }
+}
