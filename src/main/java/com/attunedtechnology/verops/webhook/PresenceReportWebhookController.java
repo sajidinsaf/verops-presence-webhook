@@ -2,17 +2,18 @@ package com.attunedtechnology.verops.webhook;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -39,6 +40,11 @@ import java.util.Map;
  *
  * <p>Either way, if a file with the same name already exists it is
  * silently overwritten.
+ *
+ * <p><b>Authentication</b> — every request must carry the header
+ * {@code X-Webhook-Token} with the value configured in
+ * {@code webhook.auth.token}.  Requests without a matching token are
+ * rejected with HTTP 401.
  */
 @RestController
 @RequestMapping("/verops/demo/weekly-presence-report")
@@ -46,10 +52,23 @@ public class PresenceReportWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(PresenceReportWebhookController.class);
 
-    private final PresenceReportStorageService storage;
+    /** Header name VerOps is told to send — matches the "Auth header name" field. */
+    static final String AUTH_HEADER = "X-Webhook-Token";
 
-    public PresenceReportWebhookController(PresenceReportStorageService storage) {
+    private final PresenceReportStorageService storage;
+    private final String expectedToken;
+
+    public PresenceReportWebhookController(
+            PresenceReportStorageService storage,
+            @Value("${webhook.auth.token}") String expectedToken) {
         this.storage = storage;
+        this.expectedToken = expectedToken;
+    }
+
+    private ResponseEntity<Map<String, Object>> unauthorized() {
+        log.warn("Rejected webhook request: missing or invalid {}", AUTH_HEADER);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "invalid or missing " + AUTH_HEADER + " header"));
     }
 
     // ── Multipart file upload ────────────────────────────────────────────────
@@ -61,8 +80,10 @@ public class PresenceReportWebhookController {
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> receiveMultipart(
+            @RequestHeader(value = AUTH_HEADER, required = false) String token,
             @RequestParam("file") MultipartFile file) {
 
+        if (!expectedToken.equals(token)) return unauthorized();
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "uploaded file is empty"));
@@ -94,10 +115,12 @@ public class PresenceReportWebhookController {
      */
     @PostMapping
     public ResponseEntity<Map<String, Object>> receiveRaw(
+            @RequestHeader(value = AUTH_HEADER, required = false) String token,
             @RequestBody(required = false) byte[] body,
             @RequestParam(name = "filename", required = false,
                           defaultValue = "weekly-presence-report.csv") String filename) {
 
+        if (!expectedToken.equals(token)) return unauthorized();
         if (body == null || body.length == 0) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "request body is empty"));
